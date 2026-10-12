@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab Sygmatel</title>
+  <meta name="description" content="Toutes les applications Sygmatel sur une même page." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0b0b0c" />
+  <link rel="icon" type="image/svg+xml" href="ppsps-icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --surface: #151517;
+      --surface-2: #1c1c1f;
+      --border: #2a2a2e;
+      --border-strong: #3f3f46;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --faint: #71717a;
+      --accent: #5bc2ce;
+      --on-accent: #06262b;
+      --red: #e84e36;
+      --ok: #34d399;
+      --warn: #fbbf24;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f6f7;
+        --surface: #ffffff;
+        --surface-2: #f1f1f3;
+        --border: #e4e4e7;
+        --border-strong: #c4c4cc;
+        --text: #18181b;
+        --muted: #52525b;
+        --faint: #71717a;
+        --accent: #1f8a96;
+        --on-accent: #ffffff;
+        --ok: #059669;
+        --warn: #b45309;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(60rem 28rem at 78% -8%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 70%),
+        radial-gradient(40rem 22rem at 8% 108%, color-mix(in oklab, var(--red) 9%, transparent), transparent 70%),
+        radial-gradient(color-mix(in oklab, var(--border-strong) 55%, transparent) 1px, transparent 1.5px);
+      background-size: auto, auto, 22px 22px;
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: clamp(32px, 8vh, 96px) 16px 48px;
+    }
+    .eyebrow {
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+    h1 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(44px, 9vw, 76px);
+      line-height: 1;
+      margin: 14px 0 12px;
+      letter-spacing: -0.01em;
+    }
+    h1 em { color: var(--accent); }
+    .lead {
+      margin: 0;
+      max-width: 34rem;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: clamp(28px, 6vh, 56px);
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 1px 2px rgb(0 0 0 / 0.2);
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border-strong); }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      overflow: hidden;
+    }
+    .logo img { width: 100%; height: 100%; display: block; }
+    .logo.padded img { width: 62%; height: 62%; object-fit: contain; }
+    .card h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-weight: 400;
+      font-size: 28px;
+      line-height: 1.1;
+      margin: 0;
+    }
+    .status {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--faint);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--faint);
+    }
+    .status[data-state="up"] { color: var(--ok); }
+    .status[data-state="up"]::before { background: var(--ok); }
+    .status[data-state="down"] { color: var(--warn); }
+    .status[data-state="down"]::before { background: var(--warn); }
+    .card p {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 14px 0 22px;
+      padding: 0;
+      list-style: none;
+    }
+    .tags li {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface-2);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.15s, background-color 0.15s;
+    }
+    .btn.primary { background: var(--accent); color: var(--on-accent); flex: 1 1 160px; }
+    .btn.primary:hover { opacity: 0.9; }
+    .btn.secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn.secondary:hover { border-color: var(--border-strong); }
+    .btn:focus-visible, .card a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .btn svg { width: 16px; height: 16px; flex: none; }
+    .url {
+      margin-top: 14px;
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--faint);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--faint);
+      line-height: 1.6;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Sygmatel · outils internes</div>
+    <h1>Le <em>Lab</em></h1>
+    <p class="lead">Toutes les applications au même endroit. Choisissez celle dont vous avez besoin : elle s'ouvre dans un nouvel onglet.</p>
+
+    <div class="grid" id="apps"></div>
+
+    <footer>
+      Chaque application garde sa propre connexion : ouvrir le Lab ne vous connecte pas automatiquement.
+    </footer>
+  </main>
+
+  <script>
+    // ------------------------------------------------------------------
+    // Liste des applications du Lab.
+    // Pour en ajouter une : copier un bloc { ... } et changer ses valeurs.
+    //   logoPadded : true si le logo doit être centré avec une marge
+    //   actions    : le premier bouton est le bouton principal
+    // ------------------------------------------------------------------
+    const APPS = [
+      {
+        name: "Reboot",
+        url: "https://reboot-sygmatel.vercel.app",
+        logo: "reboot-icon.svg",
+        description: "Le pôle de réparation de La Baule : stock de matériel reconditionné, demandes des agences, dépôts de caisses et tournées de collecte.",
+        tags: ["Stock", "Demandes", "Dépôts", "Collecte"],
+        actions: [{ label: "Ouvrir Reboot", path: "/" }],
+      },
+      {
+        name: "PPSPS Rennes",
+        url: "https://ppsps-rennes.vercel.app",
+        logo: "ppsps-icon.svg",
+        logoPadded: true,
+        description: "Signature des PPSPS sur chantier : le bureau importe le document, les techniciens le lisent et le signent sur leur téléphone.",
+        tags: ["PPSPS", "Signature", "Chantier"],
+        actions: [
+          { label: "Espace bureau", path: "/" },
+          { label: "Signer (technicien)", path: "/sign" },
+        ],
+      },
+    ];
+
+    const ARROW =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>';
+
+    const el = (tag, attrs = {}, children = []) => {
+      const node = document.createElement(tag);
+      for (const [key, value] of Object.entries(attrs)) {
+        if (key === "text") node.textContent = value;
+        else if (key === "html") node.innerHTML = value;
+        else node.setAttribute(key, value);
+      }
+      for (const child of children) node.append(child);
+      return node;
+    };
+
+    const container = document.getElementById("apps");
+    for (const app of APPS) {
+      const status = el("div", { class: "status", text: "Vérification…" });
+      const card = el("article", { class: "card" }, [
+        el("div", { class: "card-head" }, [
+          el("div", { class: "logo" + (app.logoPadded ? " padded" : "") }, [
+            el("img", { src: app.logo, alt: "", width: "48", height: "48" }),
+          ]),
+          el("div", {}, [el("h2", { text: app.name }), status]),
+        ]),
+        el("p", { text: app.description }),
+        el("ul", { class: "tags" }, app.tags.map((tag) => el("li", { text: tag }))),
+        el(
+          "div",
+          { class: "actions" },
+          app.actions.map((action, i) => {
+            const link = el("a", {
+              class: "btn " + (i === 0 ? "primary" : "secondary"),
+              href: app.url + action.path,
+              target: "_blank",
+              rel: "noopener",
+            });
+            link.append(action.label);
+            link.insertAdjacentHTML("beforeend", ARROW);
+            return link;
+          }),
+        ),
+        el("div", { class: "url", text: app.url.replace("https://", "") }),
+      ]);
+      container.append(card);
+
+      // Indique si l'application répond. La requête ne lit aucune donnée
+      // (mode « no-cors ») : elle sait seulement si le site est joignable.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      fetch(app.url, { mode: "no-cors", cache: "no-store", signal: controller.signal })
+        .then(() => {
+          status.dataset.state = "up";
+          status.textContent = "En ligne";
+        })
+        .catch(() => {
+          status.dataset.state = "down";
+          status.textContent = "Ne répond pas";
+        })
+        .finally(() => clearTimeout(timer));
+    }
+  </script>
+</body>
+</html>
