@@ -205,12 +205,43 @@
     [data-state="up"] > .dot, .dot[data-state="up"] { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 20%, transparent); }
     [data-state="down"] > .dot, .dot[data-state="down"] { background: var(--warn); box-shadow: 0 0 0 4px color-mix(in oklab, var(--warn) 20%, transparent); }
 
+    /* ---------------------------------------------------------- Compteurs */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: clamp(24px, 5vh, 40px);
+    }
+    .stats[hidden] { display: none; }
+    .stat {
+      background: color-mix(in oklab, var(--surface) 85%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stat-value {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(28px, 5vw, 38px);
+      line-height: 1.1;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat-note { font-size: 11px; color: var(--faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat.wide { grid-column: 1 / -1; }
+    }
+
     /* ------------------------------------------------------------- Cartes */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 18px;
-      margin-top: clamp(28px, 6vh, 52px);
+      margin-top: clamp(20px, 4vh, 32px);
     }
     .card {
       --accent: var(--brand);
@@ -387,11 +418,30 @@
       <div class="summary" id="summary" role="status"><span class="dot"></span><span id="summary-text">Vérification des applications…</span></div>
     </div>
 
+    <!-- Compteurs de fréquentation, anonymes (affichés quand le stockage existe) -->
+    <section class="stats" id="stats" aria-label="Fréquentation du Lab" hidden>
+      <div class="stat">
+        <div class="stat-label">Visites · 7 jours</div>
+        <div class="stat-value" id="stat-7">–</div>
+        <div class="stat-note" id="stat-today"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Visites · 30 jours</div>
+        <div class="stat-value" id="stat-30">–</div>
+        <div class="stat-note" id="stat-total"></div>
+      </div>
+      <div class="stat wide">
+        <div class="stat-label">Application la plus ouverte · 30 jours</div>
+        <div class="stat-value" id="stat-app">–</div>
+        <div class="stat-note" id="stat-app-note"></div>
+      </div>
+    </section>
+
     <div class="grid" id="apps"></div>
   </main>
 
   <footer class="wrap">
-    <p>Chaque application garde sa propre connexion. Le code du Lab est demandé une fois tous les 30 jours par appareil.</p>
+<p>Chaque application garde sa propre connexion. Le code du Lab est demandé une fois tous les 30 jours par appareil. Les visites sont comptées de façon anonyme.</p>
     <p>Sygmatel · outils internes</p>
   </footer>
 
@@ -510,6 +560,51 @@
       } catch (e) {}
     });
 
+    // --- Compteurs de fréquentation (anonymes) ---
+    // Une visite est comptée une fois par ouverture du navigateur, pas à
+    // chaque rechargement de la page. Si le stockage n'existe pas encore
+    // côté Vercel, le bloc reste simplement caché.
+    const plural = (n, word) => `${n} ${word}${n > 1 ? "s" : ""}`;
+    const showStats = (stats) => {
+      if (!stats || typeof stats.visits7 !== "number") return;
+      document.getElementById("stat-7").textContent = stats.visits7;
+      document.getElementById("stat-today").textContent = `dont ${stats.visitsToday} aujourd'hui`;
+      document.getElementById("stat-30").textContent = stats.visits30;
+      document.getElementById("stat-total").textContent = `${stats.visitsTotal} depuis le début`;
+      document.getElementById("stat-app").textContent = stats.topApp ? stats.topApp.name : "–";
+      document.getElementById("stat-app-note").textContent = stats.topApp
+        ? plural(stats.topApp.opens, "ouverture")
+        : "Aucune ouverture pour l'instant";
+      document.getElementById("stats").hidden = false;
+    };
+    (async () => {
+      let counted = false;
+      try {
+        counted = sessionStorage.getItem("lab_visit_counted") === "1";
+      } catch (e) {}
+      try {
+        const res = await fetch("/api/stats", counted
+          ? { cache: "no-store" }
+          : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "visit" }) });
+        if (!res.ok) return;
+        showStats(await res.json());
+        try {
+          sessionStorage.setItem("lab_visit_counted", "1");
+        } catch (e) {}
+      } catch (e) {
+        // Compteurs indisponibles : la page reste utilisable.
+      }
+    })();
+    const countOpen = (appName) => {
+      try {
+        const body = JSON.stringify({ event: "open", app: appName });
+        // sendBeacon : l'envoi aboutit même si l'onglet change aussitôt.
+        if (!navigator.sendBeacon || !navigator.sendBeacon("/api/stats", new Blob([body], { type: "application/json" }))) {
+          fetch("/api/stats", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+        }
+      } catch (e) {}
+    };
+
     // --- Cartes ---
     const container = document.getElementById("apps");
     const summary = document.getElementById("summary");
@@ -549,6 +644,8 @@
               });
               link.append(action.label);
               link.insertAdjacentHTML("beforeend", ARROW);
+              // Compte l'ouverture de l'application (anonyme).
+              link.addEventListener("click", () => countOpen(app.name));
               return link;
             }),
           ),
