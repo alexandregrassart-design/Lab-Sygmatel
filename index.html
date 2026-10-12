@@ -230,6 +230,15 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .stats-issue {
+      margin-top: clamp(20px, 4vh, 32px);
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px dashed var(--border-strong);
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+    .stats-issue[hidden] { display: none; }
     .stat-note { font-size: 11px; color: var(--faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @media (max-width: 560px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -437,6 +446,8 @@
       </div>
     </section>
 
+    <p class="stats-issue" id="stats-issue" role="status" hidden></p>
+
     <div class="grid" id="apps"></div>
   </main>
 
@@ -586,7 +597,14 @@
         const res = await fetch("/api/stats", counted
           ? { cache: "no-store" }
           : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "visit" }) });
-        if (!res.ok) return;
+        if (!res.ok) {
+          // On dit pourquoi les compteurs manquent, plutôt que de rester muet.
+          const data = await res.json().catch(() => null);
+          const issue = document.getElementById("stats-issue");
+          issue.textContent = `Compteurs de visites indisponibles — ${(data && data.error) || `erreur ${res.status}`}`;
+          issue.hidden = false;
+          return;
+        }
         showStats(await res.json());
         try {
           sessionStorage.setItem("lab_visit_counted", "1");
