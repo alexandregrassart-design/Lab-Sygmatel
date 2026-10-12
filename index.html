@@ -7,7 +7,7 @@
   <meta name="description" content="Toutes les applications Sygmatel sur une même page." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#0b0b0c" />
-  <link rel="icon" type="image/svg+xml" href="ppsps-icon.svg" />
+  <link rel="icon" type="image/svg+xml" href="sygmatel-mark.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -59,10 +59,41 @@
       background-attachment: fixed;
       -webkit-font-smoothing: antialiased;
     }
+    .topbar {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .brand img { width: 30px; height: auto; display: block; }
+    .logout {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .logout:hover { color: var(--text); border-color: var(--border-strong); }
+    .logout:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     main {
       max-width: 960px;
       margin: 0 auto;
-      padding: clamp(32px, 8vh, 96px) 16px 48px;
+      padding: clamp(28px, 7vh, 80px) 16px 48px;
     }
     .eyebrow {
       font-family: "Geist Mono", ui-monospace, monospace;
@@ -223,15 +254,22 @@
   </style>
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="sygmatel-mark.svg" alt="" />
+      Sygmatel
+    </div>
+    <a class="logout" href="/api/logout">Verrouiller</a>
+  </header>
   <main>
-    <div class="eyebrow">Sygmatel · outils internes</div>
+    <div class="eyebrow">Outils internes</div>
     <h1>Le <em>Lab</em></h1>
     <p class="lead">Toutes les applications au même endroit. Choisissez celle dont vous avez besoin : elle s'ouvre dans un nouvel onglet.</p>
 
     <div class="grid" id="apps"></div>
 
     <footer>
-      Chaque application garde sa propre connexion : ouvrir le Lab ne vous connecte pas automatiquement.
+      Chaque application garde sa propre connexion : ouvrir le Lab ne vous connecte pas automatiquement. Le code du Lab est demandé une fois tous les 30 jours par appareil.
     </footer>
   </main>
 
