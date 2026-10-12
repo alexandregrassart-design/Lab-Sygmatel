@@ -11,228 +11,319 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <script>
+    // Thème choisi (clair / sombre) appliqué avant l'affichage, pour éviter
+    // un flash. Sans choix, la page suit le réglage de l'appareil.
+    try {
+      const saved = localStorage.getItem("lab_theme");
+      if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+    } catch (e) {}
+  </script>
   <style>
     :root {
       --bg: #0b0b0c;
-      --surface: #151517;
+      --surface: #141416;
       --surface-2: #1c1c1f;
-      --border: #2a2a2e;
+      --border: #27272b;
       --border-strong: #3f3f46;
       --text: #f4f4f5;
       --muted: #a1a1aa;
       --faint: #71717a;
-      --accent: #5bc2ce;
-      --on-accent: #06262b;
+      --brand: #5bc2ce;
       --red: #e84e36;
       --ok: #34d399;
       --warn: #fbbf24;
+      --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 18px 40px -18px rgb(0 0 0 / 0.6);
+      --sheen: rgb(255 255 255 / 0.05);
+      color-scheme: dark;
     }
+    /* Thème clair : réglage de l'appareil, ou choix explicite. */
     @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #f6f6f7;
+      :root:not([data-theme="dark"]) {
+        --bg: #f5f5f6;
         --surface: #ffffff;
-        --surface-2: #f1f1f3;
+        --surface-2: #f0f0f2;
         --border: #e4e4e7;
-        --border-strong: #c4c4cc;
+        --border-strong: #c8c8cf;
         --text: #18181b;
         --muted: #52525b;
         --faint: #71717a;
-        --accent: #1f8a96;
-        --on-accent: #ffffff;
+        --brand: #1f8a96;
         --ok: #059669;
         --warn: #b45309;
+        --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 18px 40px -22px rgb(0 0 0 / 0.25);
+        --sheen: rgb(255 255 255 / 0.9);
+        color-scheme: light;
       }
     }
+    :root[data-theme="light"] {
+      --bg: #f5f5f6;
+      --surface: #ffffff;
+      --surface-2: #f0f0f2;
+      --border: #e4e4e7;
+      --border-strong: #c8c8cf;
+      --text: #18181b;
+      --muted: #52525b;
+      --faint: #71717a;
+      --brand: #1f8a96;
+      --ok: #059669;
+      --warn: #b45309;
+      --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 18px 40px -22px rgb(0 0 0 / 0.25);
+      --sheen: rgb(255 255 255 / 0.9);
+      color-scheme: light;
+    }
+
     * { box-sizing: border-box; }
     html, body { margin: 0; }
     body {
       min-height: 100vh;
       min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
       font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
       color: var(--text);
       background-color: var(--bg);
       background-image:
-        radial-gradient(60rem 28rem at 78% -8%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 70%),
-        radial-gradient(40rem 22rem at 8% 108%, color-mix(in oklab, var(--red) 9%, transparent), transparent 70%),
+        radial-gradient(62rem 30rem at 82% -10%, color-mix(in oklab, var(--brand) 18%, transparent), transparent 70%),
+        radial-gradient(44rem 24rem at 4% 110%, color-mix(in oklab, var(--red) 10%, transparent), transparent 70%),
         radial-gradient(color-mix(in oklab, var(--border-strong) 55%, transparent) 1px, transparent 1.5px);
       background-size: auto, auto, 22px 22px;
       background-attachment: fixed;
       -webkit-font-smoothing: antialiased;
     }
-    .topbar {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 20px 16px 0;
+    .wrap { width: 100%; max-width: 1040px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+
+    /* ---------------------------------------------------------- En-tête */
+    .topbar { padding-top: 18px; }
+    .topbar-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
+      padding: 8px 8px 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--surface) 80%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
       font-weight: 600;
-      font-size: 15px;
-      letter-spacing: 0.14em;
+      font-size: 14px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
+      min-width: 0;
     }
-    .brand img { width: 30px; height: auto; display: block; }
-    .logout {
-      font-size: 13px;
-      font-weight: 500;
+    .brand img { width: 26px; height: auto; display: block; flex: none; }
+    .brand .lab {
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
       color: var(--muted);
-      text-decoration: none;
-      padding: 10px 14px;
+      padding: 3px 8px;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--surface);
+      background: var(--surface-2);
     }
-    .logout:hover { color: var(--text); border-color: var(--border-strong); }
-    .logout:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: clamp(28px, 7vh, 80px) 16px 48px;
+    .tools { display: flex; align-items: center; gap: 6px; }
+    .tool {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      min-width: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font: 500 13px "Geist", system-ui, sans-serif;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s, background-color 0.15s;
     }
-    .eyebrow {
+    .tool:hover { color: var(--text); background: var(--surface-2); }
+    .tool.icon { padding: 0; }
+    .tool svg { width: 17px; height: 17px; flex: none; }
+    .tool:focus-visible, .btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+    .icon-moon { display: none; }
+    :root[data-theme="light"] .icon-sun { display: none; }
+    :root[data-theme="light"] .icon-moon { display: block; }
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) .icon-sun { display: none; }
+      :root:not([data-theme="dark"]) .icon-moon { display: block; }
+    }
+
+    /* ------------------------------------------------------------ Accueil */
+    main { flex: 1; padding-top: clamp(36px, 8vh, 88px); padding-bottom: 40px; }
+    .date {
       font-family: "Geist Mono", ui-monospace, monospace;
       font-size: 12px;
       color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .eyebrow::before {
-      content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--red);
+      text-transform: lowercase;
     }
     h1 {
       font-family: "Instrument Serif", Georgia, serif;
       font-weight: 400;
-      font-size: clamp(44px, 9vw, 76px);
-      line-height: 1;
-      margin: 14px 0 12px;
-      letter-spacing: -0.01em;
+      font-size: clamp(48px, 10vw, 92px);
+      line-height: 0.95;
+      letter-spacing: -0.015em;
+      margin: 14px 0 0;
     }
-    h1 em { color: var(--accent); }
-    .lead {
-      margin: 0;
-      max-width: 34rem;
+    h1 em { color: var(--brand); }
+    .hero-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px 32px;
+      margin-top: 18px;
+    }
+    .lead { margin: 0; max-width: 32rem; color: var(--muted); font-size: 16px; line-height: 1.55; }
+    .summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
       color: var(--muted);
-      font-size: 16px;
-      line-height: 1.55;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      white-space: nowrap;
     }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--faint);
+      flex: none;
+    }
+    [data-state="up"] > .dot, .dot[data-state="up"] { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 20%, transparent); }
+    [data-state="down"] > .dot, .dot[data-state="down"] { background: var(--warn); box-shadow: 0 0 0 4px color-mix(in oklab, var(--warn) 20%, transparent); }
+
+    /* ------------------------------------------------------------- Cartes */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-top: clamp(28px, 6vh, 56px);
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin-top: clamp(28px, 6vh, 52px);
     }
     .card {
+      --accent: var(--brand);
+      position: relative;
       display: flex;
       flex-direction: column;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 1px 2px rgb(0 0 0 / 0.2);
-      transition: border-color 0.2s;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 var(--sheen), var(--shadow);
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s;
+      animation: rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      animation-delay: calc(var(--i, 0) * 90ms + 80ms);
     }
-    .card:hover { border-color: var(--border-strong); }
-    .card-head {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .card:hover { transform: translateY(-3px); border-color: color-mix(in oklab, var(--accent) 55%, var(--border)); }
+    /* Halo qui suit le pointeur */
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(22rem 22rem at var(--mx, 50%) var(--my, 0%), color-mix(in oklab, var(--accent) 13%, transparent), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
+    .card:hover::after { opacity: 1; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* Illustration de l'application */
+    .art {
+      position: relative;
+      height: 168px;
+      color: var(--accent);
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--accent) 16%, var(--surface)), color-mix(in oklab, var(--accent) 4%, var(--surface)));
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .art svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .art .ink { stroke: color-mix(in oklab, var(--text) 26%, transparent); }
+    .art .paper { fill: var(--surface); stroke: color-mix(in oklab, var(--text) 16%, transparent); }
+    .art .soft { fill: color-mix(in oklab, var(--text) 12%, transparent); }
+    .art .tint { fill: color-mix(in oklab, var(--accent) 22%, transparent); }
+    .index {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: 11px;
+      color: color-mix(in oklab, var(--text) 55%, transparent);
+    }
+
+    .body { position: relative; display: flex; flex-direction: column; flex: 1; padding: 0 22px 22px; }
     .logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 56px;
+      height: 56px;
+      margin-top: -28px;
+      border-radius: 16px;
       background: #0f172a;
+      border: 3px solid var(--surface);
       display: flex;
       align-items: center;
       justify-content: center;
-      flex: none;
       overflow: hidden;
+      flex: none;
     }
     .logo img { width: 100%; height: 100%; display: block; }
-    .logo.padded img { width: 62%; height: 62%; object-fit: contain; }
+    .logo.padded img { width: 60%; height: 60%; object-fit: contain; }
+    .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 12px; }
     .card h2 {
       font-family: "Instrument Serif", Georgia, serif;
       font-weight: 400;
-      font-size: 28px;
-      line-height: 1.1;
+      font-size: 32px;
+      line-height: 1.05;
       margin: 0;
     }
-    .status {
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--faint);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .status::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--faint);
-    }
+    .status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); white-space: nowrap; }
     .status[data-state="up"] { color: var(--ok); }
-    .status[data-state="up"]::before { background: var(--ok); }
     .status[data-state="down"] { color: var(--warn); }
-    .status[data-state="down"]::before { background: var(--warn); }
-    .card p {
-      margin: 18px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 14px 0 22px;
-      padding: 0;
-      list-style: none;
-    }
+    .card p { margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 22px; padding: 0; list-style: none; }
     .tags li {
       font-size: 12px;
       color: var(--muted);
-      background: var(--surface-2);
+      border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 4px 10px;
+      padding: 3px 10px;
     }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: auto;
-    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      min-height: 44px;
+      min-height: 46px;
       padding: 0 18px;
       border-radius: 999px;
       font-size: 14px;
       font-weight: 600;
       text-decoration: none;
-      transition: opacity 0.15s, background-color 0.15s;
+      transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
     }
-    .btn.primary { background: var(--accent); color: var(--on-accent); flex: 1 1 160px; }
-    .btn.primary:hover { opacity: 0.9; }
-    .btn.secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-    .btn.secondary:hover { border-color: var(--border-strong); }
-    .btn:focus-visible, .card a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-    .btn svg { width: 16px; height: 16px; flex: none; }
+    .btn.primary { background: var(--text); color: var(--bg); flex: 1 1 170px; }
+    .btn.primary:hover { background: color-mix(in oklab, var(--text) 88%, var(--accent)); }
+    .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border-strong); flex: 1 1 150px; }
+    .btn.secondary:hover { background: var(--surface-2); }
+    .btn:active { transform: scale(0.98); }
+    .btn svg { width: 16px; height: 16px; flex: none; transition: transform 0.2s; }
+    .btn:hover svg { transform: translate(2px, -2px); }
     .url {
       margin-top: 14px;
       font-family: "Geist Mono", ui-monospace, monospace;
@@ -242,41 +333,74 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     footer {
-      margin-top: 40px;
+      padding-top: 20px;
+      padding-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+      justify-content: space-between;
       font-size: 12px;
       color: var(--faint);
       line-height: 1.6;
     }
+    footer p { margin: 0; max-width: 44rem; }
+
+    @media (max-width: 480px) {
+      .brand .lab { display: none; }
+      .tool.lock span { display: none; }
+      .tool.lock { padding: 0; }
+      .art { height: 148px; }
+    }
     @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <img src="sygmatel-mark.svg" alt="" />
-      Sygmatel
+  <header class="topbar wrap">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="sygmatel-mark.svg" alt="" />
+        Sygmatel
+        <span class="lab">Lab</span>
+      </div>
+      <div class="tools">
+        <button class="tool icon" id="theme" type="button" aria-label="Changer de thème (clair ou sombre)" title="Thème clair / sombre">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        </button>
+        <a class="tool lock" href="/api/logout" title="Refermer l'accès au Lab sur cet appareil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <span>Verrouiller</span>
+        </a>
+      </div>
     </div>
-    <a class="logout" href="/api/logout">Verrouiller</a>
   </header>
-  <main>
-    <div class="eyebrow">Outils internes</div>
-    <h1>Le <em>Lab</em></h1>
-    <p class="lead">Toutes les applications au même endroit. Choisissez celle dont vous avez besoin : elle s'ouvre dans un nouvel onglet.</p>
+
+  <main class="wrap">
+    <div class="date" id="date"></div>
+    <h1><span id="greeting">Bonjour</span>,<br />bienvenue au <em>Lab</em></h1>
+    <div class="hero-row">
+      <p class="lead">Toutes les applications Sygmatel au même endroit. Choisissez celle dont vous avez besoin&nbsp;: elle s'ouvre dans un nouvel onglet.</p>
+      <div class="summary" id="summary" role="status"><span class="dot"></span><span id="summary-text">Vérification des applications…</span></div>
+    </div>
 
     <div class="grid" id="apps"></div>
-
-    <footer>
-      Chaque application garde sa propre connexion : ouvrir le Lab ne vous connecte pas automatiquement. Le code du Lab est demandé une fois tous les 30 jours par appareil.
-    </footer>
   </main>
+
+  <footer class="wrap">
+    <p>Chaque application garde sa propre connexion. Le code du Lab est demandé une fois tous les 30 jours par appareil.</p>
+    <p>Sygmatel · outils internes</p>
+  </footer>
 
   <script>
     // ------------------------------------------------------------------
     // Liste des applications du Lab.
     // Pour en ajouter une : copier un bloc { ... } et changer ses valeurs.
+    //   accent     : couleur de l'application (bordure, halo, illustration)
+    //   art        : illustration du haut de la carte (clé de ART ci-dessous)
     //   logoPadded : true si le logo doit être centré avec une marge
     //   actions    : le premier bouton est le bouton principal
     // ------------------------------------------------------------------
@@ -285,6 +409,8 @@
         name: "Reboot",
         url: "https://reboot-sygmatel.vercel.app",
         logo: "reboot-icon.svg",
+        accent: "#5bc2ce",
+        art: "stock",
         description: "Le pôle de réparation de La Baule : stock de matériel reconditionné, demandes des agences, dépôts de caisses et tournées de collecte.",
         tags: ["Stock", "Demandes", "Dépôts", "Collecte"],
         actions: [{ label: "Ouvrir Reboot", path: "/" }],
@@ -294,6 +420,8 @@
         url: "https://ppsps-rennes.vercel.app",
         logo: "ppsps-icon.svg",
         logoPadded: true,
+        accent: "#e8553f",
+        art: "signature",
         description: "Signature des PPSPS sur chantier : le bureau importe le document, les techniciens le lisent et le signent sur leur téléphone.",
         tags: ["PPSPS", "Signature", "Chantier"],
         actions: [
@@ -302,6 +430,49 @@
         ],
       },
     ];
+
+    // Illustrations : dessins simples qui évoquent ce que fait l'application.
+    const ART = {
+      // Étagères de stock, niveaux et courbe de mouvements
+      stock: `
+        <svg viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g fill="none" stroke-width="1.5" stroke-linecap="round">
+            <rect class="paper" x="34" y="30" width="196" height="118" rx="12"/>
+            <g class="ink">
+              <path d="M52 62h160M52 96h160M52 130h160"/>
+            </g>
+            <rect class="soft" x="52" y="42" width="54" height="8" rx="4" stroke="none"/>
+            <rect x="52" y="72" width="118" height="10" rx="5" fill="currentColor" stroke="none"/>
+            <rect class="tint" x="52" y="106" width="74" height="10" rx="5" stroke="none"/>
+            <rect class="soft" x="182" y="72" width="30" height="10" rx="5" stroke="none"/>
+            <rect class="soft" x="138" y="106" width="74" height="10" rx="5" stroke="none"/>
+            <rect class="paper" x="252" y="52" width="116" height="96" rx="12"/>
+            <path d="M266 126l22-20 18 10 24-30 24 12" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="330" cy="86" r="4" fill="currentColor" stroke="none"/>
+            <rect class="soft" x="266" y="66" width="40" height="7" rx="3.5" stroke="none"/>
+            <g class="ink"><path d="M266 136h88"/></g>
+          </g>
+        </svg>`,
+      // Document à signer et téléphone avec une signature
+      signature: `
+        <svg viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g fill="none" stroke-width="1.5" stroke-linecap="round">
+            <rect class="paper" x="56" y="22" width="150" height="160" rx="10"/>
+            <rect class="soft" x="74" y="42" width="72" height="9" rx="4.5" stroke="none"/>
+            <g class="ink">
+              <path d="M74 68h112M74 84h112M74 100h84M74 116h112M74 132h60"/>
+            </g>
+            <rect class="tint" x="154" y="36" width="34" height="20" rx="5" stroke="none"/>
+            <rect class="paper" x="246" y="34" width="98" height="150" rx="16"/>
+            <rect class="soft" x="280" y="44" width="30" height="5" rx="2.5" stroke="none"/>
+            <g class="ink"><path d="M262 132h66"/></g>
+            <path d="M264 118c8-22 14-26 17-10s8 12 13-2 9-14 12 0 9 10 20-8" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <rect class="soft" x="262" y="66" width="54" height="7" rx="3.5" stroke="none"/>
+            <rect class="soft" x="262" y="80" width="38" height="7" rx="3.5" stroke="none"/>
+            <rect x="262" y="146" width="66" height="16" rx="8" fill="currentColor" stroke="none"/>
+          </g>
+        </svg>`,
+    };
 
     const ARROW =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>';
@@ -317,35 +488,79 @@
       return node;
     };
 
+    // --- En-tête : date et salutation selon l'heure ---
+    const now = new Date();
+    document.getElementById("date").textContent = now.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    document.getElementById("greeting").textContent = now.getHours() >= 18 ? "Bonsoir" : "Bonjour";
+
+    // --- Thème clair / sombre ---
+    document.getElementById("theme").addEventListener("click", () => {
+      const root = document.documentElement;
+      const current =
+        root.dataset.theme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      const next = current === "light" ? "dark" : "light";
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem("lab_theme", next);
+      } catch (e) {}
+    });
+
+    // --- Cartes ---
     const container = document.getElementById("apps");
-    for (const app of APPS) {
-      const status = el("div", { class: "status", text: "Vérification…" });
-      const card = el("article", { class: "card" }, [
-        el("div", { class: "card-head" }, [
+    const summary = document.getElementById("summary");
+    const summaryText = document.getElementById("summary-text");
+    const results = [];
+    const updateSummary = () => {
+      if (results.length < APPS.length) return;
+      const up = results.filter(Boolean).length;
+      summary.dataset.state = up === APPS.length ? "up" : "down";
+      summaryText.textContent =
+        up === APPS.length
+          ? `${APPS.length} applications · toutes en ligne`
+          : `${up} application${up > 1 ? "s" : ""} en ligne sur ${APPS.length}`;
+    };
+
+    APPS.forEach((app, i) => {
+      const statusText = el("span", { text: "Vérification…" });
+      const status = el("div", { class: "status" }, [el("span", { class: "dot" }), statusText]);
+      const card = el("article", { class: "card", style: `--accent:${app.accent}; --i:${i}` }, [
+        el("div", { class: "art", html: (ART[app.art] || "") + `<span class="index">${String(i + 1).padStart(2, "0")}</span>` }),
+        el("div", { class: "body" }, [
           el("div", { class: "logo" + (app.logoPadded ? " padded" : "") }, [
-            el("img", { src: app.logo, alt: "", width: "48", height: "48" }),
+            el("img", { src: app.logo, alt: "", width: "56", height: "56" }),
           ]),
-          el("div", {}, [el("h2", { text: app.name }), status]),
+          el("div", { class: "title-row" }, [el("h2", { text: app.name }), status]),
+          el("p", { text: app.description }),
+          el("ul", { class: "tags" }, app.tags.map((tag) => el("li", { text: tag }))),
+          el(
+            "div",
+            { class: "actions" },
+            app.actions.map((action, j) => {
+              const link = el("a", {
+                class: "btn " + (j === 0 ? "primary" : "secondary"),
+                href: app.url + action.path,
+                target: "_blank",
+                rel: "noopener",
+              });
+              link.append(action.label);
+              link.insertAdjacentHTML("beforeend", ARROW);
+              return link;
+            }),
+          ),
+          el("div", { class: "url", text: app.url.replace("https://", "") }),
         ]),
-        el("p", { text: app.description }),
-        el("ul", { class: "tags" }, app.tags.map((tag) => el("li", { text: tag }))),
-        el(
-          "div",
-          { class: "actions" },
-          app.actions.map((action, i) => {
-            const link = el("a", {
-              class: "btn " + (i === 0 ? "primary" : "secondary"),
-              href: app.url + action.path,
-              target: "_blank",
-              rel: "noopener",
-            });
-            link.append(action.label);
-            link.insertAdjacentHTML("beforeend", ARROW);
-            return link;
-          }),
-        ),
-        el("div", { class: "url", text: app.url.replace("https://", "") }),
       ]);
+      // Le halo de la carte suit le pointeur.
+      card.addEventListener("pointermove", (event) => {
+        const box = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${event.clientX - box.left}px`);
+        card.style.setProperty("--my", `${event.clientY - box.top}px`);
+      });
       container.append(card);
 
       // Indique si l'application répond. La requête ne lit aucune donnée
@@ -355,14 +570,19 @@
       fetch(app.url, { mode: "no-cors", cache: "no-store", signal: controller.signal })
         .then(() => {
           status.dataset.state = "up";
-          status.textContent = "En ligne";
+          statusText.textContent = "En ligne";
+          results.push(true);
         })
         .catch(() => {
           status.dataset.state = "down";
-          status.textContent = "Ne répond pas";
+          statusText.textContent = "Ne répond pas";
+          results.push(false);
         })
-        .finally(() => clearTimeout(timer));
-    }
+        .finally(() => {
+          clearTimeout(timer);
+          updateSummary();
+        });
+    });
   </script>
 </body>
 </html>
