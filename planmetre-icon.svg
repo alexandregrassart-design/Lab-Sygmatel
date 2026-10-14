@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Règle posée en biais : PlanMètre, le métré de plans -->
+  <g transform="rotate(-35 32 32)">
+    <rect x="6" y="24" width="52" height="16" rx="3" fill="#f2b84b"/>
+    <g stroke="#3b2a0a" stroke-width="2" stroke-linecap="round">
+      <path d="M14 24v7M22 24v5M30 24v7M38 24v5M46 24v7M54 24v5"/>
+    </g>
+  </g>
+</svg>

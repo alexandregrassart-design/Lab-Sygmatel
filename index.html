@@ -490,10 +490,44 @@
           { label: "Signer (technicien)", path: "/sign" },
         ],
       },
+      {
+        name: "PlanMètre",
+        url: "https://planmetre.vercel.app",
+        logo: "planmetre-icon.svg",
+        logoPadded: true,
+        accent: "#e9a83a",
+        art: "plan",
+        description: "Métré de plans PDF dans le navigateur : calibrer l'échelle, mesurer longueurs et surfaces, compter et annoter, sans rien installer.",
+        tags: ["Plans PDF", "Métré", "Surfaces"],
+        actions: [{ label: "Ouvrir PlanMètre", path: "/app.html" }],
+      },
     ];
 
     // Illustrations : dessins simples qui évoquent ce que fait l'application.
     const ART = {
+      // Plan de bâtiment avec une cote mesurée et une surface relevée
+      plan: `
+        <svg viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect class="paper" x="70" y="18" width="260" height="140" rx="6"/>
+            <g class="ink">
+              <path d="M96 40h208v96H96z"/>
+              <path d="M200 40v40M200 104v32M96 92h56M176 92h20"/>
+              <path d="M240 136v-26h64"/>
+            </g>
+            <rect class="tint" x="97" y="41" width="102" height="50" stroke="none"/>
+            <path d="M97 41h102v50H97z" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/>
+            <circle cx="97" cy="41" r="3.5" fill="currentColor" stroke="none"/>
+            <circle cx="199" cy="41" r="3.5" fill="currentColor" stroke="none"/>
+            <circle cx="199" cy="91" r="3.5" fill="currentColor" stroke="none"/>
+            <circle cx="97" cy="91" r="3.5" fill="currentColor" stroke="none"/>
+            <path d="M96 30h208" stroke="currentColor" stroke-width="2"/>
+            <path d="M96 25v10M304 25v10" stroke="currentColor" stroke-width="2"/>
+            <rect x="172" y="22" width="56" height="16" rx="8" fill="currentColor" stroke="none"/>
+            <rect class="soft" x="230" y="54" width="52" height="8" rx="4" stroke="none"/>
+            <rect class="soft" x="230" y="68" width="36" height="8" rx="4" stroke="none"/>
+          </g>
+        </svg>`,
       // Étagères de stock, niveaux et courbe de mouvements
       stock: `
         <svg viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
