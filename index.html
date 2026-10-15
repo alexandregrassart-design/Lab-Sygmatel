@@ -445,16 +445,6 @@
     .btn:active { transform: scale(0.98); }
     .btn svg { width: 16px; height: 16px; flex: none; transition: transform 0.2s; }
     .btn:hover svg { transform: translate(2px, -2px); }
-    .url {
-      margin-top: 14px;
-      font-family: "Geist Mono", ui-monospace, monospace;
-      font-size: 11px;
-      color: var(--faint);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
     footer {
       padding-top: 20px;
       padding-bottom: 28px;
@@ -1109,7 +1099,6 @@
               return link;
             }),
           ),
-          el("div", { class: "url", text: app.url.replace("https://", "") }),
         ]),
       ]);
       // Le halo de la carte suit le pointeur.
