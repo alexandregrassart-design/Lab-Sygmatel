@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Calendrier avec des barres d'interventions : Planning Chantier -->
+  <rect x="8" y="12" width="48" height="44" rx="7" fill="#7c8cf8"/>
+  <rect x="8" y="12" width="48" height="12" rx="7" fill="#4f5fd6"/>
+  <path d="M20 8v9M44 8v9" stroke="#2a2f6b" stroke-width="3" stroke-linecap="round"/>
+  <rect x="14" y="30" width="22" height="6" rx="3" fill="#ffffff"/>
+  <rect x="26" y="40" width="24" height="6" rx="3" fill="#dfe3ff"/>
+  <rect x="14" y="48" width="14" height="4" rx="2" fill="#dfe3ff"/>
+</svg>
