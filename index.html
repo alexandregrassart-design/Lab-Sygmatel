@@ -245,6 +245,78 @@
       .stat.wide { grid-column: 1 / -1; }
     }
 
+    /* ------------------------------------------------------ Boîte à idées */
+    .ideas { margin-top: clamp(36px, 7vh, 64px); }
+    .ideas-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+    .ideas h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(30px, 5vw, 40px);
+      line-height: 1.05;
+      margin: 0;
+    }
+    .ideas h2 em { color: var(--brand); }
+    .ideas-lead { margin: 8px 0 0; color: var(--muted); font-size: 15px; max-width: 34rem; }
+    .ideas-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px; margin-top: 20px; align-items: start; }
+    @media (max-width: 860px) { .ideas-layout { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: inset 0 1px 0 var(--sheen), var(--shadow);
+    }
+    .panel h3 { margin: 0 0 14px; font-size: 15px; font-weight: 600; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 999px; background: var(--surface-2); margin-bottom: 14px; }
+    .seg button {
+      min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--muted);
+      font: 500 13px "Geist", system-ui, sans-serif; cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.2); }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%; min-height: 44px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font: 15px "Geist", system-ui, sans-serif;
+    }
+    .field textarea { min-height: 110px; resize: vertical; line-height: 1.45; }
+    .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible, .seg button:focus-visible, .vote:focus-visible, .sort button:focus-visible {
+      outline: 2px solid var(--brand); outline-offset: 2px;
+    }
+    .form-msg { min-height: 18px; font-size: 13px; margin: 2px 0 10px; }
+    .form-msg[data-kind="error"] { color: var(--warn); }
+    .form-msg[data-kind="ok"] { color: var(--ok); }
+    .submit {
+      width: 100%; min-height: 46px; border: 0; border-radius: 999px; background: var(--text); color: var(--bg);
+      font: 600 14px "Geist", system-ui, sans-serif; cursor: pointer;
+    }
+    .submit:disabled { opacity: 0.5; cursor: wait; }
+    .list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .sort { display: flex; gap: 4px; }
+    .sort button {
+      border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 999px;
+      padding: 6px 12px; font: 500 12px "Geist", system-ui, sans-serif; cursor: pointer;
+    }
+    .sort button[aria-pressed="true"] { color: var(--text); border-color: var(--border-strong); background: var(--surface-2); }
+    .idea { padding: 14px 0; border-top: 1px solid var(--border); display: flex; gap: 14px; }
+    .idea:first-child { border-top: 0; padding-top: 4px; }
+    .idea-main { flex: 1; min-width: 0; }
+    .idea-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 4px; }
+    .chip { font-size: 11px; border-radius: 999px; padding: 2px 9px; background: var(--surface-2); color: var(--muted); }
+    .chip.new { background: color-mix(in oklab, var(--brand) 16%, transparent); color: var(--brand); }
+    .chip.improve { background: color-mix(in oklab, #e9a83a 18%, transparent); color: #c8861d; }
+    .idea-title { font-weight: 600; font-size: 15px; margin: 2px 0 0; overflow-wrap: anywhere; }
+    .idea-details { color: var(--muted); font-size: 14px; margin: 4px 0 0; white-space: pre-line; overflow-wrap: anywhere; }
+    .idea-by { color: var(--faint); font-size: 12px; margin-top: 6px; }
+    .vote {
+      flex: none; align-self: flex-start; min-width: 64px; min-height: 52px; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font: 600 15px "Geist", system-ui, sans-serif; gap: 1px;
+    }
+    .vote small { font-size: 10px; font-weight: 500; color: var(--muted); }
+    .vote[aria-pressed="true"] { border-color: var(--brand); color: var(--brand); cursor: default; }
+    .empty { color: var(--muted); font-size: 14px; padding: 18px 0 6px; text-align: center; }
+
     /* ------------------------------------------------------------- Cartes */
     .grid {
       display: grid;
@@ -449,6 +521,55 @@
     <p class="stats-issue" id="stats-issue" role="status" hidden></p>
 
     <div class="grid" id="apps"></div>
+
+    <!-- Boîte à idées : améliorations et nouveaux logiciels -->
+    <section class="ideas" id="idees" aria-labelledby="ideas-title">
+      <div class="ideas-head">
+        <div>
+          <h2 id="ideas-title">Boîte à <em>idées</em></h2>
+          <p class="ideas-lead">Une amélioration pour une application, ou l'idée d'un nouveau logiciel qui vous ferait gagner du temps ? Proposez-la, et soutenez celles des autres.</p>
+        </div>
+      </div>
+
+      <div class="ideas-layout">
+        <form class="panel" id="idea-form" novalidate>
+          <h3>Proposer une idée</h3>
+          <div class="seg" role="group" aria-label="Type d'idée">
+            <button type="button" data-type="amelioration" aria-pressed="true">Améliorer une application</button>
+            <button type="button" data-type="nouveau" aria-pressed="false">Nouveau logiciel</button>
+          </div>
+          <div class="field" id="app-field">
+            <label for="idea-app">Application concernée</label>
+            <select id="idea-app"></select>
+          </div>
+          <div class="field">
+            <label for="idea-title" id="idea-title-label">Votre idée en une phrase</label>
+            <input id="idea-title" maxlength="120" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="idea-details">Détails (facultatif) : le besoin, qui l'utiliserait, ce que ça changerait</label>
+            <textarea id="idea-details" maxlength="2000"></textarea>
+          </div>
+          <div class="field">
+            <label for="idea-author">Votre prénom (facultatif)</label>
+            <input id="idea-author" maxlength="60" autocomplete="given-name" />
+          </div>
+          <p class="form-msg" id="idea-msg" role="status"></p>
+          <button class="submit" type="submit" id="idea-submit">Envoyer l'idée</button>
+        </form>
+
+        <div class="panel">
+          <div class="list-head">
+            <h3 style="margin:0" id="ideas-count">Idées proposées</h3>
+            <div class="sort" role="group" aria-label="Trier les idées">
+              <button type="button" data-sort="votes" aria-pressed="true">Les plus soutenues</button>
+              <button type="button" data-sort="recent" aria-pressed="false">Les plus récentes</button>
+            </div>
+          </div>
+          <div id="ideas-list"><p class="empty">Chargement des idées…</p></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="wrap">
@@ -656,6 +777,162 @@
         }
       } catch (e) {}
     };
+
+    // --- Boîte à idées ---
+    const ideaForm = document.getElementById("idea-form");
+    const ideaApp = document.getElementById("idea-app");
+    const appField = document.getElementById("app-field");
+    const ideaTitleLabel = document.getElementById("idea-title-label");
+    const ideaMsg = document.getElementById("idea-msg");
+    const ideaSubmit = document.getElementById("idea-submit");
+    const ideasList = document.getElementById("ideas-list");
+    const ideasCount = document.getElementById("ideas-count");
+    let ideaType = "amelioration";
+    let ideaSort = "votes";
+    let ideas = [];
+
+    for (const app of APPS) ideaApp.append(el("option", { value: app.name, text: app.name }));
+    ideaApp.append(el("option", { value: "Le Lab", text: "Le Lab (cette page)" }));
+
+    // Idées déjà soutenues sur cet appareil (un soutien par idée).
+    const readVoted = () => {
+      try {
+        return new Set(JSON.parse(localStorage.getItem("lab_ideas_voted") || "[]"));
+      } catch (e) {
+        return new Set();
+      }
+    };
+    const saveVoted = (set) => {
+      try {
+        localStorage.setItem("lab_ideas_voted", JSON.stringify([...set]));
+      } catch (e) {}
+    };
+
+    const setIdeaMsg = (text, kind) => {
+      ideaMsg.textContent = text;
+      ideaMsg.dataset.kind = kind || "";
+    };
+
+    for (const button of ideaForm.querySelectorAll(".seg button")) {
+      button.addEventListener("click", () => {
+        ideaType = button.dataset.type;
+        for (const b of ideaForm.querySelectorAll(".seg button")) b.setAttribute("aria-pressed", String(b === button));
+        appField.hidden = ideaType !== "amelioration";
+        ideaTitleLabel.textContent =
+          ideaType === "amelioration" ? "Votre idée en une phrase" : "Le logiciel en une phrase : ce qu'il ferait";
+      });
+    }
+    for (const button of document.querySelectorAll(".sort button")) {
+      button.addEventListener("click", () => {
+        ideaSort = button.dataset.sort;
+        for (const b of document.querySelectorAll(".sort button")) b.setAttribute("aria-pressed", String(b === button));
+        renderIdeas();
+      });
+    }
+
+    function renderIdeas() {
+      const voted = readVoted();
+      ideasCount.textContent = ideas.length ? `Idées proposées (${ideas.length})` : "Idées proposées";
+      ideasList.replaceChildren();
+      if (ideas.length === 0) {
+        ideasList.append(el("p", { class: "empty", text: "Aucune idée pour l'instant : soyez le premier à en proposer une." }));
+        return;
+      }
+      const sorted = [...ideas].sort((a, b) =>
+        ideaSort === "votes" && (b.votes || 0) !== (a.votes || 0)
+          ? (b.votes || 0) - (a.votes || 0)
+          : String(b.createdAt).localeCompare(String(a.createdAt)),
+      );
+      for (const idea of sorted) {
+        const isNew = idea.type === "nouveau";
+        const meta = el("div", { class: "idea-meta" }, [
+          el("span", { class: "chip " + (isNew ? "new" : "improve"), text: isNew ? "Nouveau logiciel" : "Amélioration" }),
+        ]);
+        if (!isNew && idea.app) meta.append(el("span", { class: "chip", text: idea.app }));
+        const date = new Date(idea.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+        const main = el("div", { class: "idea-main" }, [
+          meta,
+          el("p", { class: "idea-title", text: idea.title }),
+        ]);
+        if (idea.details) main.append(el("p", { class: "idea-details", text: idea.details }));
+        main.append(el("p", { class: "idea-by", text: `${idea.author ? idea.author + " · " : ""}${date}` }));
+
+        const already = voted.has(idea.id);
+        const vote = el(
+          "button",
+          {
+            class: "vote",
+            type: "button",
+            "aria-pressed": String(already),
+            title: already ? "Vous soutenez déjà cette idée" : "Soutenir cette idée",
+          },
+          [el("span", { text: String(idea.votes || 0) }), el("small", { text: already ? "soutenue" : "moi aussi" })],
+        );
+        vote.addEventListener("click", () => supportIdea(idea.id));
+        ideasList.append(el("article", { class: "idea" }, [main, vote]));
+      }
+    }
+
+    async function callIdeas(init) {
+      const res = await fetch("/api/ideas", { cache: "no-store", ...init });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error((data && data.error) || `Erreur ${res.status}`);
+      ideas = Array.isArray(data.ideas) ? data.ideas : [];
+      renderIdeas();
+    }
+
+    async function supportIdea(id) {
+      const voted = readVoted();
+      if (voted.has(id)) return;
+      try {
+        await callIdeas({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "vote", id }),
+        });
+        voted.add(id);
+        saveVoted(voted);
+        renderIdeas();
+      } catch (e) {
+        setIdeaMsg(`Le soutien n'a pas pu être enregistré : ${e.message}`, "error");
+      }
+    }
+
+    ideaForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const title = document.getElementById("idea-title").value.trim();
+      if (title.length < 3) {
+        setIdeaMsg("Décrivez votre idée en une phrase.", "error");
+        document.getElementById("idea-title").focus();
+        return;
+      }
+      ideaSubmit.disabled = true;
+      setIdeaMsg("Envoi…", "");
+      try {
+        await callIdeas({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: ideaType,
+            app: ideaType === "amelioration" ? ideaApp.value : "",
+            title,
+            details: document.getElementById("idea-details").value,
+            author: document.getElementById("idea-author").value,
+          }),
+        });
+        document.getElementById("idea-title").value = "";
+        document.getElementById("idea-details").value = "";
+        setIdeaMsg("Merci ! Votre idée a été ajoutée.", "ok");
+      } catch (e) {
+        setIdeaMsg(`L'idée n'a pas pu être envoyée : ${e.message}`, "error");
+      } finally {
+        ideaSubmit.disabled = false;
+      }
+    });
+
+    callIdeas({}).catch((e) => {
+      ideasList.replaceChildren(el("p", { class: "empty", text: `Boîte à idées indisponible — ${e.message}` }));
+    });
 
     // --- Cartes ---
     const container = document.getElementById("apps");

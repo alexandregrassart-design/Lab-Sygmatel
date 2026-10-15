@@ -1,4 +1,4 @@
-import { put, get } from "@vercel/blob";
+import { storageToken, NO_STORAGE_MESSAGE, readJson, writeJson, storageErrorDetail, parseBody } from "./_storage.js";
 
 // Compteurs de fréquentation du Lab, anonymes : on ne retient que des
 // nombres par jour (visites du Lab, ouvertures de chaque application).
@@ -78,75 +78,19 @@ export function summarize(data, today) {
   };
 }
 
-// Jeton du stockage : nom habituel, ou nom personnalisé choisi à la
-// création du stockage sur Vercel (ex. LAB_STATS_READ_WRITE_TOKEN).
-function storageToken() {
-  if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN;
-  const name = Object.keys(process.env).find((key) => key.endsWith("_READ_WRITE_TOKEN") && process.env[key]);
-  return name ? process.env[name] : "";
-}
-
-// Un stockage Vercel Blob est créé « privé » ou « public » : on s'adapte à
-// celui qui existe, en essayant d'abord privé.
-let accessMode = null;
-async function withAccess(run) {
-  const modes = accessMode ? [accessMode] : ["private", "public"];
-  let lastError;
-  for (const mode of modes) {
-    try {
-      const result = await run(mode);
-      accessMode = mode;
-      return result;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError;
-}
-
-async function readStats(token) {
-  const result = await withAccess((access) => get(FILE, { access, token, useCache: false }));
-  if (!result) return { days: {} };
-  if (result.statusCode !== 200 || !result.stream) throw new Error("Lecture des compteurs impossible.");
-  const data = JSON.parse(await new Response(result.stream).text());
-  return data && typeof data === "object" ? data : { days: {} };
-}
-
-async function writeStats(data, token) {
-  await withAccess((access) =>
-    put(FILE, JSON.stringify(data), {
-      access,
-      token,
-      addRandomSuffix: false,
-      contentType: "application/json",
-      allowOverwrite: true,
-    }),
-  );
-}
-
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const token = storageToken();
   if (!token) {
-    return res.status(503).json({
-      error: "Aucun stockage Blob n'est relié au projet sur Vercel (ou le projet n'a pas été redéployé depuis).",
-    });
+    return res.status(503).json({ error: NO_STORAGE_MESSAGE });
   }
   try {
     const today = parisDay();
-    const data = await readStats(token);
+    const data = await readJson(FILE, token, { days: {} });
     if (req.method === "POST") {
-      // sendBeacon envoie le corps en texte : on accepte les deux formes.
-      let body = req.body || {};
-      if (typeof body === "string") {
-        try {
-          body = JSON.parse(body);
-        } catch (e) {
-          body = {};
-        }
-      }
+      const body = parseBody(req);
       if (!applyEvent(data, body, today)) return res.status(400).json({ error: "Événement inconnu." });
-      await writeStats(data, token);
+      await writeJson(FILE, data, token);
     } else if (req.method !== "GET") {
       return res.status(405).json({ error: "Méthode non autorisée." });
     }
@@ -154,7 +98,6 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error("Lab stats error:", error);
     // Le détail aide à dépanner ; il ne contient ni jeton ni donnée.
-    const detail = String(error?.message || error).replace(/vercel_blob_rw_[A-Za-z0-9_]+/g, "[jeton]").slice(0, 200);
-    return res.status(500).json({ error: `Le stockage a répondu par une erreur : ${detail}` });
+    return res.status(500).json({ error: `Le stockage a répondu par une erreur : ${storageErrorDetail(error)}` });
   }
 }
