@@ -316,6 +316,15 @@
     .vote small { font-size: 10px; font-weight: 500; color: var(--muted); }
     .vote[aria-pressed="true"] { border-color: var(--brand); color: var(--brand); cursor: default; }
     .empty { color: var(--muted); font-size: 14px; padding: 18px 0 6px; text-align: center; }
+    .idea-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 6px; }
+    .idea-foot .idea-by { margin-top: 0; }
+    .link-btn {
+      border: 0; background: none; padding: 2px 0; cursor: pointer; color: var(--faint);
+      font: 500 12px "Geist", system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px;
+    }
+    .link-btn:hover, .link-btn:focus-visible { color: var(--text); }
+    .link-btn.danger:hover, .link-btn.danger:focus-visible { color: #e5484d; }
+    .moderation { display: flex; justify-content: flex-end; gap: 12px; align-items: center; margin-top: 12px; font-size: 12px; color: var(--faint); }
 
     /* ------------------------------------------------------------- Cartes */
     .grid {
@@ -567,6 +576,10 @@
             </div>
           </div>
           <div id="ideas-list"><p class="empty">Chargement des idées…</p></div>
+          <div class="moderation">
+            <span id="moderation-state"></span>
+            <button type="button" class="link-btn" id="moderation-toggle">Mode modération</button>
+          </div>
         </div>
       </div>
     </section>
@@ -808,6 +821,62 @@
       } catch (e) {}
     };
 
+    // Idées proposées depuis cet appareil : { id: clé de suppression }.
+    const readMine = () => {
+      try {
+        const mine = JSON.parse(localStorage.getItem("lab_ideas_mine") || "{}");
+        return mine && typeof mine === "object" ? mine : {};
+      } catch (e) {
+        return {};
+      }
+    };
+    const saveMine = (mine) => {
+      try {
+        localStorage.setItem("lab_ideas_mine", JSON.stringify(mine));
+      } catch (e) {}
+    };
+
+    // Code de modération : gardé le temps de l'onglet seulement.
+    let adminCode = "";
+    try {
+      adminCode = sessionStorage.getItem("lab_admin_code") || "";
+    } catch (e) {}
+    const moderationToggle = document.getElementById("moderation-toggle");
+    const moderationState = document.getElementById("moderation-state");
+    const renderModeration = () => {
+      moderationToggle.textContent = adminCode ? "Quitter la modération" : "Mode modération";
+      moderationState.textContent = adminCode ? "Modération active : vous pouvez supprimer toutes les idées." : "";
+    };
+    renderModeration();
+    moderationToggle.addEventListener("click", async () => {
+      if (adminCode) {
+        adminCode = "";
+        try {
+          sessionStorage.removeItem("lab_admin_code");
+        } catch (e) {}
+      } else {
+        const code = (window.prompt("Code de modération :") || "").trim();
+        if (!code) return;
+        const res = await fetch("/api/ideas", {
+          method: "POST",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "moderator", adminCode: code }),
+        }).catch(() => null);
+        const data = res ? await res.json().catch(() => null) : null;
+        if (!res || !res.ok) {
+          setIdeaMsg((data && data.error) || "Vérification du code impossible.", "error");
+          return;
+        }
+        adminCode = code;
+        try {
+          sessionStorage.setItem("lab_admin_code", code);
+        } catch (e) {}
+      }
+      renderModeration();
+      renderIdeas();
+    });
+
     const setIdeaMsg = (text, kind) => {
       ideaMsg.textContent = text;
       ideaMsg.dataset.kind = kind || "";
@@ -832,6 +901,7 @@
 
     function renderIdeas() {
       const voted = readVoted();
+      const mine = readMine();
       ideasCount.textContent = ideas.length ? `Idées proposées (${ideas.length})` : "Idées proposées";
       ideasList.replaceChildren();
       if (ideas.length === 0) {
@@ -855,7 +925,15 @@
           el("p", { class: "idea-title", text: idea.title }),
         ]);
         if (idea.details) main.append(el("p", { class: "idea-details", text: idea.details }));
-        main.append(el("p", { class: "idea-by", text: `${idea.author ? idea.author + " · " : ""}${date}` }));
+        const foot = el("div", { class: "idea-foot" }, [
+          el("p", { class: "idea-by", text: `${idea.author ? idea.author + " · " : ""}${date}` }),
+        ]);
+        if (mine[idea.id] || adminCode) {
+          const remove = el("button", { class: "link-btn danger", type: "button", text: "Supprimer" });
+          remove.addEventListener("click", () => removeIdea(idea));
+          foot.append(remove);
+        }
+        main.append(foot);
 
         const already = voted.has(idea.id);
         const vote = el(
@@ -878,7 +956,30 @@
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error((data && data.error) || `Erreur ${res.status}`);
       ideas = Array.isArray(data.ideas) ? data.ideas : [];
+      if (data.created && data.created.id && data.created.deleteKey) {
+        const mine = readMine();
+        mine[data.created.id] = data.created.deleteKey;
+        saveMine(mine);
+      }
       renderIdeas();
+    }
+
+    async function removeIdea(idea) {
+      if (!window.confirm(`Supprimer l'idée « ${idea.title} » ? Elle disparaîtra pour tout le monde.`)) return;
+      const mine = readMine();
+      try {
+        await callIdeas({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete", id: idea.id, key: mine[idea.id] || "", adminCode }),
+        });
+        delete mine[idea.id];
+        saveMine(mine);
+        renderIdeas();
+        setIdeaMsg("Idée supprimée.", "ok");
+      } catch (e) {
+        setIdeaMsg(`La suppression n'a pas pu être faite : ${e.message}`, "error");
+      }
     }
 
     async function supportIdea(id) {
